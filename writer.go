@@ -1,7 +1,6 @@
 package ico
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/binary"
 	"image"
@@ -27,46 +26,54 @@ type icondirentry struct {
 	offset       uint32
 }
 
-func newIcondir() icondir {
-	var id icondir
-	id.imageType = 1
-	id.numImages = 1
-	return id
-}
-
-func newIcondirentry() icondirentry {
+func newIcondirentry(offset int) icondirentry {
 	var ide icondirentry
-	ide.colorPlanes = 1   // windows is supposed to not mind 0 or 1, but other icon files seem to have 1 here
-	ide.bitsPerPixel = 32 // can be 24 for bitmap or 24/32 for png. Set to 32 for now
-	ide.offset = 22       //6 icondir + 16 icondirentry, next image will be this image size + 16 icondirentry, etc
+	ide.colorPlanes = 1         // windows is supposed to not mind 0 or 1, but other icon files seem to have 1 here
+	ide.bitsPerPixel = 32       // can be 24 for bitmap or 24/32 for png. Set to 32 for now
+	ide.offset = uint32(offset) //6 icondir + 16 icondirentry, next image will be this image size + 16 icondirentry, etc
 	return ide
 }
 
-func Encode(w io.Writer, im image.Image) error {
-	b := im.Bounds()
-	m := image.NewRGBA(b)
-	draw.Draw(m, b, im, b.Min, draw.Src)
-
-	id := newIcondir()
-	ide := newIcondirentry()
+func Encode(w io.Writer, images ...image.Image) (err error) {
+	id := icondir{
+		imageType: 1,
+		numImages: uint16(len(images)),
+	}
+	err = binary.Write(w, binary.LittleEndian, id)
+	if err != nil {
+		return
+	}
+	imageSizes := make([]int, len(images))
 
 	pngbb := new(bytes.Buffer)
-	pngwriter := bufio.NewWriter(pngbb)
-	png.Encode(pngwriter, m)
-	pngwriter.Flush()
-	ide.sizeInBytes = uint32(len(pngbb.Bytes()))
-
-	bounds := m.Bounds()
-	ide.imageWidth = uint8(bounds.Dx())
-	ide.imageHeight = uint8(bounds.Dy())
-	bb := new(bytes.Buffer)
-
-	var e error
-	binary.Write(bb, binary.LittleEndian, id)
-	binary.Write(bb, binary.LittleEndian, ide)
-
-	w.Write(bb.Bytes())
-	w.Write(pngbb.Bytes())
-
-	return e
+	for i, im := range images {
+		prevSize := len(pngbb.Bytes())
+		b := im.Bounds()
+		m := image.NewRGBA(b)
+		draw.Draw(m, b, im, b.Min, draw.Src)
+		err = png.Encode(pngbb, m)
+		if err != nil {
+			return
+		}
+		imageSizes[i] = len(pngbb.Bytes()) - prevSize
+	}
+	offset := 6 + 16*len(images)
+	for i, im := range images {
+		bounds := im.Bounds()
+		entry := icondirentry{
+			imageWidth:   uint8(bounds.Dx()),
+			imageHeight:  uint8(bounds.Dy()),
+			colorPlanes:  1,
+			bitsPerPixel: 32,
+			sizeInBytes:  uint32(imageSizes[i]),
+			offset:       uint32(offset),
+		}
+		offset += imageSizes[i]
+		err = binary.Write(w, binary.LittleEndian, entry)
+		if err != nil {
+			return
+		}
+	}
+	_, err = w.Write(pngbb.Bytes())
+	return
 }

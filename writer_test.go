@@ -26,6 +26,23 @@ func TestWriter(t *testing.T) {
 	icoimg, _ := os.Create("new.ico")
 	defer icoimg.Close()
 	icoerror := Encode(icoimg, m0)
-	fmt.Printf("icoerror: %s\n", icoerror)
+	fmt.Printf("icoerror: %v\n", icoerror)
+}
+
+func TestWriterWithMultipleImage(t *testing.T) {
+	fn1 := "icondata-small.png"
+	m0, err := readPng(fn1)
+	if err != nil {
+		t.Error(fn1, err)
+	}
+	fn2 := "icondata.png"
+	m1, err := readPng(fn2)
+	if err != nil {
+		t.Error(fn2, err)
+	}
+	icoimg, _ := os.Create("new2.ico")
+	defer icoimg.Close()
+	icoerror := Encode(icoimg, m0, m1)
+	fmt.Printf("icoerror: %v\n", icoerror)
 
 }
