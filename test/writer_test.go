@@ -1,10 +1,10 @@
-package ico
+package main_test
 
 import (
-	"fmt"
 	"image"
 	"image/png"
 	"os"
+	"png2ico/pkg/image/ico"
 	"testing"
 )
 
@@ -18,31 +18,48 @@ func readPng(filename string) (image.Image, error) {
 }
 
 func TestWriter(t *testing.T) {
-	fn := "icondata.png"
+	fn := "data/icondata.png"
 	m0, err := readPng(fn)
 	if err != nil {
 		t.Error(fn, err)
 	}
-	icoimg, _ := os.Create("new.ico")
-	defer icoimg.Close()
-	icoerror := Encode(icoimg, m0)
-	fmt.Printf("icoerror: %v\n", icoerror)
+	outIco, _ := os.Create("output.ico")
+	defer func() {
+		outIco.Close()
+		os.Remove("output.ico")
+	}()
+
+	if err := ico.Encode(outIco, m0); err != nil {
+		t.Fatalf("ico.Encode error: %v\n", err)
+	}
+
+	// Check output successful
+	if _, err := os.Stat("output.ico"); os.IsNotExist(err) {
+		t.Fatalf("output ico not exists error: %v\n", err)
+	}
 }
 
 func TestWriterWithMultipleImage(t *testing.T) {
-	fn1 := "icondata-small.png"
+	fn1 := "data/gopher.png"
 	m0, err := readPng(fn1)
 	if err != nil {
 		t.Error(fn1, err)
 	}
-	fn2 := "icondata.png"
+	fn2 := "data/icondata.png"
 	m1, err := readPng(fn2)
 	if err != nil {
 		t.Error(fn2, err)
 	}
-	icoimg, _ := os.Create("new2.ico")
-	defer icoimg.Close()
-	icoerror := Encode(icoimg, m0, m1)
-	fmt.Printf("icoerror: %v\n", icoerror)
+	outIco, _ := os.Create("output.ico")
+	defer func() {
+		outIco.Close()
+		os.Remove("output.ico")
+	}()
 
+	if err := ico.Encode(outIco, m0, m1); err != nil {
+		t.Fatalf("ico.Encode error: %v\n", err)
+	}
+	if _, err := os.Stat("output.ico"); os.IsNotExist(err) {
+		t.Fatalf("output ico not exists error: %v\n", err)
+	}
 }
