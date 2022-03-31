@@ -9,12 +9,14 @@ import (
 	"io"
 )
 
+// https://github.com/CarsonSlovoka/golang-image-ico/blob/79394d2/README.md?plain=1#L11-L17
 type icondir struct {
 	reserved  uint16
 	imageType uint16
 	numImages uint16
 }
 
+// https://github.com/CarsonSlovoka/golang-image-ico/blob/79394d2/README.md?plain=1#L27-L38
 type icondirentry struct {
 	imageWidth   uint8
 	imageHeight  uint8
