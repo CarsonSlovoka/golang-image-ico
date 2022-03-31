@@ -1,25 +1,15 @@
 package main_test
 
 import (
-	"image"
-	"image/png"
 	"os"
 	"png2ico/pkg/image/ico"
+	png2 "png2ico/pkg/image/png"
 	"testing"
 )
 
-func readPng(filename string) (image.Image, error) {
-	f, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	return png.Decode(f)
-}
-
 func TestWriter(t *testing.T) {
 	fn := "data/icondata.png"
-	m0, err := readPng(fn)
+	m0, err := png2.ReadImg(fn)
 	if err != nil {
 		t.Error(fn, err)
 	}
@@ -41,12 +31,12 @@ func TestWriter(t *testing.T) {
 
 func TestWriterWithMultipleImage(t *testing.T) {
 	fn1 := "data/gopher.png"
-	m0, err := readPng(fn1)
+	m0, err := png2.ReadImg(fn1)
 	if err != nil {
 		t.Error(fn1, err)
 	}
 	fn2 := "data/icondata.png"
-	m1, err := readPng(fn2)
+	m1, err := png2.ReadImg(fn2)
 	if err != nil {
 		t.Error(fn2, err)
 	}
