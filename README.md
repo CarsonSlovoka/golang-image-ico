@@ -4,6 +4,20 @@ golang support for windows .ico file format
 
 > http://en.wikipedia.org/wiki/ICO_(file_format)
 
+## USAGE
+
+```
+git clone https://github.com/CarsonSlovoka/golang-image-ico.git
+go install -v
+png2ico.exe -help
+png2ico.exe -fromFile="C:\xxx\my-input.png" -name="my-output.ico"
+```
+
+output:
+```
+C:\xxx\my-output.ico   // the output directory same as the `fromFile`
+```
+
 ## Icon resource structure
 
 All values in ICO/CUR files are represented in **[little-endian]** byte order.
@@ -18,11 +32,11 @@ All values in ICO/CUR files are represented in **[little-endian]** byte order.
 
 ### Structure of image directory
 
-|            |                            |
-|------------|----------------------------|
-| Image #1   | Entry for the first image  |
-| Image #2   | Entry for the second image |
-| Image #n   | Entry for the last image   |
+|         |                            |
+|---------|----------------------------|
+| Image 1 | Entry for the first image  |
+| Image 2 | Entry for the second image |
+| Image n | Entry for the last image   |
 
 ### ICONDIRENTRY structure
 

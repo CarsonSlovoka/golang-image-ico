@@ -14,7 +14,7 @@ func main() {
 	var (
 		inputPng       = flag.String("fromFile", "", "Input source PNG")
 		outputFilename = flag.String("name", "", "The output filepath of ICO")
-		isForceMode    = flag.Bool("f", false, "Force write to the output file, regardless of whether the output file already exists.")
+		isForceMode    = flag.Bool("f", false, "(Optional) Force write to the output file, regardless of whether the output file already exists.")
 	)
 
 	flag.Parse()
